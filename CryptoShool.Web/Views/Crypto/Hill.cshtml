@@ -1,0 +1,183 @@
+@{
+    ViewData["Title"] = "Шифр Хилла";
+}
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Теория</h5>
+                    <p class="card-text">
+                        Шифр Хилла - это полиграммный шифр подстановки, использующий матричную алгебру для шифрования текста. Каждая буква текста представляется числом, и шифрование выполняется путем умножения матрицы ключа на вектор текста.
+                    </p>
+                    <p class="card-text">
+                        Принцип работы:
+                        <ul>
+                            <li>Создается квадратная матрица ключа (например, 2x2 или 3x3)</li>
+                            <li>Текст разбивается на группы букв по размеру матрицы</li>
+                            <li>Каждая буква заменяется на число (А=0, Б=1, ..., Я=32)</li>
+                            <li>Шифрование: умножение матрицы ключа на вектор текста по модулю 33</li>
+                            <li>Расшифрование: умножение на обратную матрицу ключа</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Практика</h5>
+                    <div class="form-group">
+                        <label for="text">Текст:</label>
+                        <textarea class="form-control" id="text" rows="3"></textarea>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="key">Ключевая матрица:</label>
+                        <input type="text" class="form-control" id="key" placeholder="Введите матрицу (например: 2,3,5,7)">
+                        <small class="form-text text-muted">Введите элементы матрицы через запятую (для матрицы 2x2 нужно 4 числа)</small>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary" onclick="encrypt()">Зашифровать</button>
+                        <button class="btn btn-secondary" onclick="decrypt()">Расшифровать</button>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="result">Результат:</label>
+                        <textarea class="form-control" id="result" rows="3" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Задание 1</h5>
+                    <p class="card-text">
+                        Зашифруйте слово "ПРИВЕТ" с помощью шифра Хилла, используя матрицу [2,3,5,7].
+                        <br>
+                        Ответ: <input type="text" id="answer1" class="form-control mt-2">
+                        <button class="btn btn-success mt-2" onclick="checkAnswer(1)">Проверить</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Задание 2</h5>
+                    <p class="card-text">
+                        Расшифруйте слово "ФХИУБ" с помощью шифра Хилла, используя матрицу [2,3,5,7].
+                        <br>
+                        Ответ: <input type="text" id="answer2" class="form-control mt-2">
+                        <button class="btn btn-success mt-2" onclick="checkAnswer(2)">Проверить</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function encrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if (!text || !key) {
+                alert('Пожалуйста, введите текст и ключ');
+                return;
+            }
+
+            $.post('/Crypto/Encrypt', { 
+                algorithm: 'hill', 
+                text: text, 
+                key: key 
+            })
+            .done(function(response) {
+                if (response.success) {
+                    document.getElementById('result').value = response.result;
+                } else {
+                    alert('Ошибка: ' + response.message);
+                }
+            })
+            .fail(function(error) {
+                alert('Ошибка при шифровании');
+            });
+        }
+
+        function decrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if (!text || !key) {
+                alert('Пожалуйста, введите текст и ключ');
+                return;
+            }
+
+            $.post('/Crypto/Decrypt', { 
+                algorithm: 'hill', 
+                text: text, 
+                key: key 
+            })
+            .done(function(response) {
+                if (response.success) {
+                    document.getElementById('result').value = response.result;
+                } else {
+                    alert('Ошибка: ' + response.message);
+                }
+            })
+            .fail(function(error) {
+                alert('Ошибка при расшифровании');
+            });
+        }
+
+        function checkAnswer(taskNumber) {
+            const answer = document.getElementById('answer' + taskNumber).value.toUpperCase();
+            
+            if (!answer) {
+                alert('Пожалуйста, введите ответ');
+                return;
+            }
+
+            let text, key;
+            if (taskNumber === 1) {
+                text = 'ПРИВЕТ';
+                key = '2,3,5,7';
+            } else {
+                text = 'ФХИУБ';
+                key = '2,3,5,7';
+            }
+
+            const action = taskNumber === 1 ? 'encrypt' : 'decrypt';
+            $.post('/Crypto/' + action, { 
+                algorithm: 'hill', 
+                text: text, 
+                key: key 
+            })
+            .done(function(response) {
+                if (response.success) {
+                    const correctAnswer = response.result;
+                    if (answer === correctAnswer) {
+                        alert('Правильно!');
+                    } else {
+                        alert('Неправильно. Попробуйте еще раз.');
+                    }
+                } else {
+                    alert('Ошибка при проверке ответа: ' + response.message);
+                }
+            })
+            .fail(function(error) {
+                alert('Ошибка при проверке ответа');
+            });
+        }
+    </script>
+} 

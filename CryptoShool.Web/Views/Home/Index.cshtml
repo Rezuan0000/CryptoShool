@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="container">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Добро пожаловать в CryptoShool!</h1>
+        <p class="lead">Изучайте криптографию в интерактивном формате</p>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Ваш прогресс</h5>
+                        <div id="progress">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Загрузка...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Шифр Цезаря</h5>
+                    <p class="card-text">Один из самых древних и простых методов шифрования, использующий сдвиг букв алфавита.</p>
+                    <a asp-controller="Crypto" asp-action="Caesar" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Шифр Виженера</h5>
+                    <p class="card-text">Метод шифрования, использующий последовательность разных шифров Цезаря на основе ключевого слова.</p>
+                    <a asp-controller="Crypto" asp-action="Vigenere" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">XOR Шифрование</h5>
+                    <p class="card-text">Метод шифрования, основанный на операции исключающего ИЛИ между текстом и ключом.</p>
+                    <a asp-controller="Crypto" asp-action="XOR" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Шифр Хилла</h5>
+                    <p class="card-text">Метод шифрования, использующий матричную алгебру для преобразования текста.</p>
+                    <a asp-controller="Crypto" asp-action="Hill" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">RSA</h5>
+                    <p class="card-text">Асимметричный алгоритм шифрования, основанный на сложности факторизации больших чисел.</p>
+                    <a asp-controller="Crypto" asp-action="RSA" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Шифр Плейфера</h5>
+                    <p class="card-text">Метод шифрования, использующий таблицу для преобразования пар букв.</p>
+                    <a asp-controller="Crypto" asp-action="Playfair" class="btn btn-primary">Изучить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <text>
+            function loadProgress() {
+                $.get('/Crypto/GetProgress')
+                    .done(function(response) {
+                        if (response.length === 0) {
+                            $('#progress').html('<p class="text-muted">У вас пока нет прогресса. Начните изучение шифров!</p>');
+                            return;
+                        }
+
+                        let html = '<div class="row">';
+                        response.forEach(function(item) {
+                            const progressClass = item.score === 100 ? 'bg-success' : 
+                                               item.score >= 50 ? 'bg-info' : 
+                                               item.score > 0 ? 'bg-warning' : 'bg-secondary';
+                            
+                            html += `
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">${item.algorithmName}</h6>
+                                            <div class="progress">
+                                                <div class="progress-bar ${progressClass}" 
+                                                     role="progressbar" 
+                                                     style="width: ${item.score}%" 
+                                                     aria-valuenow="${item.score}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    ${item.score}%
+                                                </div>
+                                            </div>
+                                            <small class="text-muted mt-2 d-block">
+                                                ${item.isCompleted ? 'Завершено' : 'В процессе'}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                        html += '</div>';
+                        $('#progress').html(html);
+                    })
+                    .fail(function() {
+                        $('#progress').html('<p class="text-danger">Ошибка загрузки прогресса</p>');
+                    });
+            }
+
+            // Загружаем прогресс при загрузке страницы
+            $(document).ready(function() {
+                loadProgress();
+                // Обновляем прогресс каждые 30 секунд
+                setInterval(loadProgress, 30000);
+            });
+            </text>
+        }
+    </script>
+}
