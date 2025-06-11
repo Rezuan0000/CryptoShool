@@ -10,6 +10,6 @@ namespace CryptoShool.Web.Services
         Task<string> Decrypt(string algorithm, string text, string key);
         Task<bool> CheckAnswer(string algorithm, string text, string key, string answer);
         Task<List<UserProgress>> GetUserProgress(string userId);
-        Task UpdateProgress(string userId, string algorithm, int score);
+        Task UpdateProgress(string userId, string algorithm, int score, string taskIdentifier);
     }
 } 

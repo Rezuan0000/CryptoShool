@@ -18,6 +18,10 @@ namespace CryptoShool.Web.Models
 
         public int Score { get; set; }
 
+        // Хранит список выполненных заданий в формате "taskNumber:operation"
+        // Например: "1:encrypt,2:decrypt"
+        public string CompletedTasks { get; set; } = "";
+
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
     }

@@ -34,7 +34,7 @@ namespace CryptoShool.Web.Services
                 .ToListAsync();
         }
 
-        public async Task UpdateProgress(string userId, string algorithm, int score)
+        public async Task UpdateProgress(string userId, string algorithm, int score, string taskIdentifier)
         {
             var progress = await _context.UserProgress
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.Algorithm == algorithm);
@@ -45,13 +45,25 @@ namespace CryptoShool.Web.Services
                 {
                     UserId = userId,
                     Algorithm = algorithm,
-                    Score = score
+                    Score = score,
+                    CompletedTasks = taskIdentifier
                 };
                 _context.UserProgress.Add(progress);
             }
             else
             {
-                progress.Score = Math.Max(progress.Score, score);
+                // Проверяем, было ли задание выполнено ранее
+                var completedTasks = progress.CompletedTasks.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (!completedTasks.Contains(taskIdentifier))
+                {
+                    // Добавляем новое выполненное задание
+                    progress.CompletedTasks = string.IsNullOrEmpty(progress.CompletedTasks) 
+                        ? taskIdentifier 
+                        : progress.CompletedTasks + "," + taskIdentifier;
+                    
+                    // Увеличиваем прогресс только для нового выполнения
+                    progress.Score = Math.Min(100, progress.Score + score);
+                }
             }
 
             await _context.SaveChangesAsync();
