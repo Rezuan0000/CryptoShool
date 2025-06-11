@@ -86,15 +86,80 @@ namespace CryptoShool.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CheckAnswer(string algorithm, string text, string key, string answer)
+        public async Task<IActionResult> CheckAnswer(string algorithm, string text, string key, string answer, string operation = "encrypt")
         {
             if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(key) || string.IsNullOrEmpty(answer))
             {
                 return Json(new { success = false, message = "Текст, ключ и ответ не могут быть пустыми" });
             }
 
-            var result = await _cryptoService.CheckAnswer(algorithm, text, key, answer);
-            return Json(new { success = true, result = result });
+            string result;
+            if (operation.ToLower() == "decrypt")
+            {
+                // Для расшифровки сравниваем ответ с исходным текстом
+                result = await _cryptoService.Decrypt(algorithm, text, key);
+                var isCorrect = result.Equals(answer, StringComparison.OrdinalIgnoreCase);
+                
+                if (isCorrect)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        // Получаем текущий прогресс
+                        var progress = await _cryptoService.GetUserProgress(user.Id);
+                        var currentProgress = progress.FirstOrDefault(p => p.Algorithm == algorithm);
+                        var currentScore = currentProgress?.Score ?? 0;
+                        
+                        // Увеличиваем прогресс на 20% для расшифровки
+                        await _cryptoService.UpdateProgress(user.Id, algorithm, currentScore + 20);
+                    }
+                }
+                
+                return Json(new { success = true, result = isCorrect });
+            }
+            else
+            {
+                // Для шифрования сравниваем ответ с зашифрованным текстом
+                result = await _cryptoService.Encrypt(algorithm, text, key);
+                var isCorrect = result.Equals(answer, StringComparison.OrdinalIgnoreCase);
+                
+                if (isCorrect)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        // Получаем текущий прогресс
+                        var progress = await _cryptoService.GetUserProgress(user.Id);
+                        var currentProgress = progress.FirstOrDefault(p => p.Algorithm == algorithm);
+                        var currentScore = currentProgress?.Score ?? 0;
+                        
+                        // Увеличиваем прогресс на 20% для шифрования
+                        await _cryptoService.UpdateProgress(user.Id, algorithm, currentScore + 20);
+                    }
+                }
+                
+                return Json(new { success = true, result = isCorrect });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetProgress()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new List<object>());
+            }
+
+            var progress = await _cryptoService.GetUserProgress(user.Id);
+            var result = progress.Select(p => new
+            {
+                algorithmName = p.Algorithm,
+                score = p.Score,
+                isCompleted = p.Score >= 100
+            }).ToList();
+
+            return Json(result);
         }
 
         private int[,] ParseHillKey(string key)

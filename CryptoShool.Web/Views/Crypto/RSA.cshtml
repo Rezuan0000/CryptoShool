@@ -94,6 +94,17 @@
 
 @section Scripts {
     <script>
+        function loadProgress() {
+            $.get('/Crypto/GetProgress')
+                .done(function(response) {
+                    // Обновляем прогресс на главной странице
+                    window.parent.loadProgress();
+                })
+                .fail(function() {
+                    console.error('Ошибка загрузки прогресса');
+                });
+        }
+
         function encrypt() {
             const text = document.getElementById('text').value;
             const key = document.getElementById('key').value;
@@ -163,17 +174,21 @@
                 key = '3,33,7';
             }
 
-            const action = taskNumber === 1 ? 'encrypt' : 'decrypt';
-            $.post('/Crypto/' + action, { 
+            const operation = taskNumber === 1 ? 'encrypt' : 'decrypt';
+
+            $.post('/Crypto/CheckAnswer', { 
                 algorithm: 'rsa', 
                 text: text, 
-                key: key 
+                key: key,
+                answer: answer,
+                operation: operation
             })
             .done(function(response) {
                 if (response.success) {
-                    const correctAnswer = response.result;
-                    if (answer === correctAnswer) {
+                    if (response.result) {
                         alert('Правильно!');
+                        // Обновляем прогресс на главной странице
+                        loadProgress();
                     } else {
                         alert('Неправильно. Попробуйте еще раз.');
                     }
