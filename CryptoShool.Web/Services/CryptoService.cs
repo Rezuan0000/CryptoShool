@@ -223,6 +223,9 @@ namespace CryptoShool.Web.Services
             string result = "";
             char[,] matrix = CreatePlayfairMatrix(key);
 
+            // Подготовка текста
+            text = text.ToUpper();
+
             for (int i = 0; i < text.Length; i += 2)
             {
                 if (i + 1 >= text.Length)
@@ -275,6 +278,9 @@ namespace CryptoShool.Web.Services
             string result = "";
             char[,] matrix = CreatePlayfairMatrix(key);
 
+            // Подготовка текста
+            text = text.ToUpper();
+
             for (int i = 0; i < text.Length; i += 2)
             {
                 if (i + 1 >= text.Length)
@@ -320,9 +326,13 @@ namespace CryptoShool.Web.Services
         {
             const string alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ .,";
             char[,] matrix = new char[6, 6];
+            
+            // Подготовка ключа
+            key = key.ToUpper();
+            
+            // Создаем строку с уникальными символами
             string keyString = key + alphabet;
             keyString = new string(keyString.Distinct().ToArray());
-            keyString = keyString.Replace("Ё", "Е").Replace("Й", "И").Replace("Ъ", "Ь");
 
             int index = 0;
             for (int i = 0; i < 6; i++)
@@ -342,6 +352,7 @@ namespace CryptoShool.Web.Services
         private int[] FindPosition(char[,] matrix, char c)
         {
             c = char.ToUpper(c);
+            
             for (int i = 0; i < 6; i++)
             {
                 for (int j = 0; j < 6; j++)
