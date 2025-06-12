@@ -259,7 +259,7 @@ namespace CryptoShool.Web.Services
                 {
                     if (text[i] == text[i + 1])
                     {
-                        pairs.Add(text[i].ToString() + 'Ъ');
+                        pairs.Add(text[i].ToString() + '/');
                         i--; // Отступаем назад, чтобы обработать вторую букву в следующей итерации
                     }
                     else
@@ -269,7 +269,7 @@ namespace CryptoShool.Web.Services
                 }
                 else
                 {
-                    pairs.Add(text[i].ToString() + 'Ъ');
+                    pairs.Add(text[i].ToString() + '/');
                 }
             }
 
@@ -284,14 +284,14 @@ namespace CryptoShool.Web.Services
                     if (pos1.row == pos2.row)
                     {
                         // Если буквы в одной строке
-                        result.Append(table[pos1.row, (pos1.col + 1) % 5]);
-                        result.Append(table[pos2.row, (pos2.col + 1) % 5]);
+                        result.Append(table[pos1.row, (pos1.col + 1) % 6]);
+                        result.Append(table[pos2.row, (pos2.col + 1) % 6]);
                     }
                     else if (pos1.col == pos2.col)
                     {
                         // Если буквы в одном столбце
-                        result.Append(table[(pos1.row + 1) % 5, pos1.col]);
-                        result.Append(table[(pos2.row + 1) % 5, pos2.col]);
+                        result.Append(table[(pos1.row + 1) % 6, pos1.col]);
+                        result.Append(table[(pos2.row + 1) % 6, pos2.col]);
                     }
                     else
                     {
@@ -343,14 +343,14 @@ namespace CryptoShool.Web.Services
                     if (pos1.row == pos2.row)
                     {
                         // Если буквы в одной строке
-                        result.Append(table[pos1.row, (pos1.col + 4) % 5]);
-                        result.Append(table[pos2.row, (pos2.col + 4) % 5]);
+                        result.Append(table[pos1.row, (pos1.col + 5) % 6]);
+                        result.Append(table[pos2.row, (pos2.col + 5) % 6]);
                     }
                     else if (pos1.col == pos2.col)
                     {
                         // Если буквы в одном столбце
-                        result.Append(table[(pos1.row + 4) % 5, pos1.col]);
-                        result.Append(table[(pos2.row + 4) % 5, pos2.col]);
+                        result.Append(table[(pos1.row + 5) % 6, pos1.col]);
+                        result.Append(table[(pos2.row + 5) % 6, pos2.col]);
                     }
                     else
                     {
@@ -365,15 +365,15 @@ namespace CryptoShool.Web.Services
                 }
             }
 
-            // Удаляем добавленные буквы Ъ
-            return result.ToString().Replace("Ъ", "");
+            // Удаляем добавленные символ "/"
+            return result.ToString().Replace("/", "");
         }
 
         private char[,] CreatePlayfairTable(string key)
         {
-            var table = new char[5, 5];
+            var table = new char[6, 6];
             var used = new HashSet<char>();
-            var alphabet = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЫЭЮЯ";
+            var alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ., ";
             int row = 0, col = 0;
 
             // Добавляем ключ в таблицу
@@ -384,7 +384,7 @@ namespace CryptoShool.Web.Services
                     table[row, col] = c;
                     used.Add(c);
                     col++;
-                    if (col == 5)
+                    if (col == 6)
                     {
                         col = 0;
                         row++;
@@ -400,7 +400,7 @@ namespace CryptoShool.Web.Services
                     table[row, col] = c;
                     used.Add(c);
                     col++;
-                    if (col == 5)
+                    if (col == 6)
                     {
                         col = 0;
                         row++;
@@ -413,9 +413,9 @@ namespace CryptoShool.Web.Services
 
         private (int row, int col) FindPosition(char[,] table, char c)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < 6; j++)
                 {
                     if (table[i, j] == c)
                     {
@@ -423,7 +423,7 @@ namespace CryptoShool.Web.Services
                     }
                 }
             }
-            throw new ArgumentException($"Буква '{c}' не найдена в таблице Плейфера");
+            throw new ArgumentException($"Символ '{c}' не найдена в таблице Плейфера");
         }
     }
 } 
